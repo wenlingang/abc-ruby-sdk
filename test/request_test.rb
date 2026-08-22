@@ -55,6 +55,16 @@ class RequestTest < Minitest::Test
     end
   end
 
+  def test_missing_response_signature_raises
+    body = build_signed_response(@api)
+    body.delete('sign')
+    stub_request(:post, ENDPOINT).to_return(status: 200, body: body.to_json)
+
+    assert_raises(Abcbank::SignatureVerificationError) do
+      @api.enterprise_account.apply_authorization({ data: {} })
+    end
+  end
+
   def test_verify_can_be_disabled
     body = build_signed_response(@api)
     body['sign'] = Base64.strict_encode64('forged-signature')

@@ -54,7 +54,8 @@ module Abcbank
 
     def verify_sign!(body)
       return if Abcbank.config.verify_response_sign == false
-      return if body['sign'].to_s.empty?
+
+      raise SignatureVerificationError, '响应报文缺少 sign 字段' if body['sign'].to_s.empty?
 
       plaintext = Crypt.sign_plaintext(body)
       return if client.crypt.verify(plaintext, body['sign'])
